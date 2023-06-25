@@ -1,38 +1,35 @@
-import React from 'react';
+import { useContext, useState, useEffect } from 'react';
+import { db } from '../firebase/config';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { AuthContext } from '../contexts/AuthContext';
 
 export default function Chats() {
+    const [chat, setChat] = useState([]);
+    const { girisKullanici } = useContext(AuthContext);
+
+    useEffect(() => {
+        const getChats = () => {
+            const unsub = onSnapshot(doc(db, 'kullaniciChatler', girisKullanici.uid), (doc) => {
+                setChat(doc.data());
+            });
+            return () => {
+                unsub();
+            };
+        };
+        girisKullanici.uid && getChats();
+    }, [girisKullanici.uid]);
+
     return (
-        <div className="chats">
-            <div className="userChat">
-                <img
-                    src="https://images.pexels.com/photos/13160157/pexels-photo-13160157.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load"
-                    alt=""
-                />
-                <div className="userChatInfo">
-                    <span>Mert</span>
-                    <p>Son Mesaj</p>
+        <div className="chats" key={chat[0]}>
+            {Object.entries(chat)?.map((chat) => (
+                <div className="userChat">
+                    <img src={chat[1].kullaniciBilgi.fotoURLD} alt="" />
+                    <div className="userChatInfo">
+                        <span>{chat[1].kullaniciBilgi.kullaniciAdi}</span>
+                        <p>{chat[1].sonMesaj?.text}</p>
+                    </div>
                 </div>
-            </div>
-            <div className="userChat">
-                <img
-                    src="https://images.pexels.com/photos/13160157/pexels-photo-13160157.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load"
-                    alt=""
-                />
-                <div className="userChatInfo">
-                    <span>Cuma</span>
-                    <p>İkinci Mesaj</p>
-                </div>
-            </div>
-            <div className="userChat">
-                <img
-                    src="https://images.pexels.com/photos/13160157/pexels-photo-13160157.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load"
-                    alt=""
-                />
-                <div className="userChatInfo">
-                    <span>Yıldız</span>
-                    <p>Üçüncü Mesaj</p>
-                </div>
-            </div>
+            ))}
         </div>
     );
 }
