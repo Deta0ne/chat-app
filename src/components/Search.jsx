@@ -1,17 +1,49 @@
-import React from 'react';
+import { useState } from 'react';
+import { db } from '../firebase/config';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 export default function Search() {
+    const [arananKullanici, setArananKullanici] = useState('');
+    const [kullanici, setKullanici] = useState(null);
+    const [hata, setHata] = useState(false);
+
+    const handleAra = async () => {
+        const q = query(collection(db, 'kullanicilar'), where('kullaniciAdi', '==', arananKullanici));
+
+        try {
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+                setKullanici(doc.data());
+            });
+        } catch (error) {
+            setHata(error);
+        }
+    };
+
+    const handleKey = (e) => {
+        e.code === 'Enter' && handleAra();
+    };
+
     return (
         <div className="search">
             <div className="searchForm">
-                <input type="text" placeholder="Kullanıcı Ara" />
+                <input
+                    type="text"
+                    placeholder="Kullanıcı Ara"
+                    onKeyDown={handleKey}
+                    onChange={(e) => setArananKullanici(e.target.value)}
+                    value={arananKullanici}
+                />
             </div>
-            <div className="userChat">
-                <img src="https://images.pexels.com/photos/13160157/pexels-photo-13160157.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load" />
-                <div className="userChatInfo">
-                    <span>Mert</span>
+            {hata && <p>Kullanıcı Bulunamadı</p>}
+            {kullanici && (
+                <div className="userChat">
+                    <img src={kullanici.fotoURLD} />
+                    <div className="userChatInfo">
+                        <span>{kullanici.kullaniciAdi}</span>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
