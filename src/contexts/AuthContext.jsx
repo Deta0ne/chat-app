@@ -10,7 +10,6 @@ export const AuthContextProvider = ({ children }) => {
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (kullanici) => {
             setGirisKullanici(kullanici);
-            console.log(kullanici);
         });
         return () => {
             unsub();

@@ -2,11 +2,14 @@ import { useState, useContext } from 'react';
 import { db } from '../firebase/config';
 import { collection, query, where, getDocs, getDoc, doc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { AuthContext } from '../contexts/AuthContext';
+import { ChatContext } from '../contexts/ChatContext';
 
 export default function Search() {
     const [arananKullanici, setArananKullanici] = useState('');
     const [kullanici, setKullanici] = useState(null);
     const [hata, setHata] = useState(false);
+
+    const { dispatch } = useContext(ChatContext);
 
     const { girisKullanici } = useContext(AuthContext);
 
@@ -55,6 +58,7 @@ export default function Search() {
                     [birlerştirilmişId + '.tarih']: serverTimestamp(),
                 });
             }
+            dispatch({ type: 'CHANGE_USER', payload: kullanici });
         } catch (error) {}
         setKullanici(null);
         setArananKullanici('');
